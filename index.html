@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Unusual Whales – MCP Server Setup Guide</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d0f12;--sur:#161a1f;--sur2:#1c2128;--bdr:#2a3040;--acc:#3b82f6;--grn:#22c55e;--txt:#e2e8f0;--mut:#8b9ab0;--cbg:#0f1923}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+nav{background:var(--sur);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.logo{font-size:1.1rem;font-weight:700;color:var(--txt);text-decoration:none}
+.logo span{color:var(--acc)}
+.badge{background:#1e3a5f;color:#60a5fa;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.05em}
+.nl{margin-left:auto;display:flex;gap:20px}
+.nl a{color:var(--mut);text-decoration:none;font-size:.875rem}
+.nl a:hover{color:var(--txt)}
+.wrap{max-width:960px;margin:0 auto;padding:48px 24px 80px}
+h1{font-size:2.2rem;font-weight:700;margin-bottom:16px;line-height:1.2}
+.sub{color:var(--mut);font-size:1rem;max-width:700px;margin-bottom:28px}
+.brow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px}
+.btn{display:inline-block;padding:9px 20px;border-radius:6px;font-size:.875rem;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+.bp{background:var(--acc);color:#fff}
+.bg{background:transparent;border:1px solid var(--bdr);color:var(--txt)}
+.bp:hover,.bg:hover{opacity:.85}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:56px}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.sc{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:24px;text-align:center}
+.sn{font-size:2rem;font-weight:700;display:block}
+.sl{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+h2{font-size:1.5rem;font-weight:700;margin-bottom:24px;margin-top:48px}
+h3{font-size:1rem;font-weight:600;margin-bottom:8px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px}
+@media(max-width:640px){.steps{grid-template-columns:1fr}}
+.step{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:24px}
+.snum{width:28px;height:28px;background:var(--acc);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;margin-bottom:12px}
+.step p{color:var(--mut);font-size:.9rem}
+.step a,.al a{color:var(--acc);text-decoration:none}
+.step a:hover,.al a:hover{text-decoration:underline}
+.al{background:#1a2535;border:1px solid var(--acc);border-radius:8px;padding:16px 20px;margin-bottom:40px;display:flex;gap:12px;font-size:.9rem}
+.ai{color:var(--acc);font-size:1.1rem;flex-shrink:0;margin-top:1px}
+pre{background:var(--cbg);border:1px solid var(--bdr);border-radius:8px;padding:18px;overflow-x:auto;font-family:'SF Mono','Fira Code',monospace;font-size:.82rem;line-height:1.7;color:#a8c0d6;margin-bottom:16px;position:relative}
+.cl{position:absolute;top:10px;right:10px;background:var(--bdr);color:var(--mut);border:none;border-radius:4px;padding:4px 10px;font-size:.72rem;cursor:pointer;font-family:inherit;transition:background .2s}
+.cl:hover{background:var(--acc);color:#fff}
+.cl.ok{background:var(--grn);color:#fff}
+code{background:rgba(59,130,246,.12);color:#93c5fd;padding:1px 6px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace;font-size:.85em}
+pre code{background:none;color:inherit;padding:0}
+.tbr{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--bdr)}
+.tb{padding:8px 16px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:.875rem;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s}
+.tb.on{color:var(--txt);border-bottom-color:var(--acc)}
+.tp{display:none}
+.tp.on{display:block}
+.idesteps{display:flex;flex-direction:column;gap:20px}
+.ids{display:flex;gap:16px;align-items:flex-start}
+.isn{width:24px;height:24px;background:var(--sur2);border:1px solid var(--bdr);color:var(--mut);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;margin-top:2px}
+.ids h4{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.ids p{color:var(--mut);font-size:.875rem}
+.fr{display:grid;grid-template-columns:100px 1fr 80px;background:var(--sur2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-top:12px}
+.fl{background:var(--sur);padding:10px 14px;font-size:.72rem;color:var(--mut);font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-right:1px solid var(--bdr);display:flex;align-items:center}
+.fv{padding:10px 14px;font-family:'SF Mono','Fira Code',monospace;font-size:.82rem;color:var(--txt);display:flex;align-items:center;word-break:break-all}
+.fc{background:var(--bdr);border:none;color:var(--mut);cursor:pointer;font-size:.72rem;padding:10px 14px;border-left:1px solid var(--bdr);font-family:inherit;transition:background .2s}
+.fc:hover{background:var(--acc);color:#fff}
+.fc.ok{background:var(--grn);color:#fff}
+.tc{display:inline-block;background:var(--acc);color:#fff;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:4px;margin-bottom:16px}
+.tg{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.tt{background:var(--cbg);border:1px solid var(--bdr);color:#93c5fd;font-family:'SF Mono','Fira Code',monospace;font-size:.75rem;padding:4px 10px;border-radius:4px}
+.qg{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:48px}
+@media(max-width:640px){.qg{grid-template-columns:1fr}}
+.qc{background:var(--sur);border:1px solid var(--bdr);border-radius:10px;padding:18px}
+.qt{font-size:.9rem;color:var(--txt);margin-bottom:10px;font-style:italic}
+.qu{font-size:.75rem;color:var(--mut)}
+.qu code{font-size:.72rem}
+table{width:100%;border-collapse:collapse;margin-bottom:48px;font-size:.875rem}
+th{background:var(--sur2);padding:10px 14px;text-align:left;font-weight:600;border-bottom:1px solid var(--bdr);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+td{padding:10px 14px;border-bottom:1px solid var(--bdr);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.req{color:var(--acc);font-size:.75rem;font-weight:700}
+.faq{display:flex;flex-direction:column;gap:12px;margin-bottom:48px}
+.fq{background:var(--sur);border:1px solid var(--bdr);border-radius:8px;overflow:hidden}
+.fqh{width:100%;background:none;border:none;padding:16px 20px;text-align:left;color:var(--txt);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:inherit}
+.fqh:hover{background:var(--sur2)}
+.fqa{padding:0 20px;max-height:0;overflow:hidden;transition:max-height .3s,padding .3s;color:var(--mut);font-size:.875rem;line-height:1.7}
+.fqa.open{padding:0 20px 16px;max-height:500px}
+.cta{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:40px;text-align:center;margin-top:48px}
+.cta h2{margin-top:0}
+.cta p{color:var(--mut);margin-bottom:24px}
+.clbl{font-size:.75rem;margin-top:6px;display:block;color:var(--mut);font-style:italic}
+</style>
+</head>
+<body>
+<nav>
+<a class="logo" href="https://unusualwhales.com">Unusual <span>Whales</span></a>
+<span class="badge">MCP SERVER</span>
+<div class="nl">
+<a href="https://unusualwhales.com/public-api">API</a>
+<a href="https://unusualwhales.com/changelog">Changelog</a>
+<a href="https://unusualwhales.com/information">Info</a>
+<a href="https://unusualwhales.com/live-options-flow">Live Flow</a>
+</div>
+</nav>
+<div class="wrap">
+<div class="badge" style="margin-bottom:20px">MCP SERVER</div>
+<h1>MCP Server Setup Guide</h1>
+<p class="sub">Connect your AI assistant to real-time market data in under 30 seconds. Access options flow, dark pool trades, congressional activity, institutional holdings, and more through natural language.</p>
+<div class="brow">
+<a class="btn bp" href="https://unusualwhales.com/settings/api-dashboard">Get API Key</a>
+<a class="btn bg" href="https://www.npmjs.com/package/@unusualwhales/mcp">npm Package &rarr;</a>
+<a class="btn bg" href="https://github.com/unusual-whales/unusual-whales-official-mcp">GitHub &rarr;</a>
+<a class="btn bg" href="https://github.com/erikmaday/unusual-whales-mcp">Community MCP &rarr;</a>
+</div>
+<div class="stats">
+<div class="sc"><span class="sn">70</span><span class="sl">Tools</span></div>
+<div class="sc"><span class="sn">123+</span><span class="sl">Actions</span></div>
+<div class="sc"><span class="sn">30s</span><span class="sl">Setup</span></div>
+<div class="sc"><span class="sn">33</span><span class="sl">Prompts</span></div>
+</div>
+
+<h2>Setup in 3 Steps</h2>
+<div class="steps">
+<div class="step"><div class="snum">1</div><h3>Get Your API Key</h3><p>Go to <a href="https://unusualwhales.com/settings/api-dashboard">Settings &rarr; API Dashboard</a> and copy your API key.</p></div>
+<div class="step"><div class="snum">2</div><h3>Add the Config</h3><p>Open your IDE's config file (see paths below). If the file doesn't exist, create it and paste the full config. If it already has content, add the <code>"mcpServers"</code> block as a new top-level key.</p></div>
+<div class="step"><div class="snum">3</div><h3>Restart Your Client</h3><p>Fully quit and reopen your AI assistant (Claude Desktop, Cursor, VS Code, etc.) for the MCP server to connect. Just saving the file is not enough.</p></div>
+</div>
+<div class="al"><span class="ai">&#9432;</span><div><strong>Important:</strong> The MCP server URL is <code>https://api.unusualwhales.com/api/mcp</code>. Do <em>not</em> use <code>unusualwhales.com/public-api/mcp</code> (this page) or <code>mcp.unusualwhales.com</code> (different server).</div></div>
+
+<h2>Already Have a Config File?</h2>
+<p style="color:var(--mut);margin-bottom:20px">Add the <code>"mcpServers"</code> block as a sibling key next to your existing keys:</p>
+<p class="code-label" style="color:var(--mut);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Before (your existing file)</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "preferences": {
+    "coworkWebSearchEnabled": true,
+    "sidebarMode": "chat"
+  }
+}</code></pre>
+<p style="color:var(--mut);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:16px">After (add mcpServers next to it)</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "preferences": {
+    "coworkWebSearchEnabled": true,
+    "sidebarMode": "chat"
+  },
+  "mcpServers": {
+    "unusual-whales": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.unusualwhales.com/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY"
+      ]
+    }
+  }
+}</code></pre>
+
+<h2>IDE Configuration</h2>
+<div class="tbr">
+<button class="tb on" onclick="sw(this,'p1')">Claude Desktop</button>
+<button class="tb" onclick="sw(this,'p2')">Perplexity</button>
+<button class="tb" onclick="sw(this,'p3')">Cursor</button>
+<button class="tb" onclick="sw(this,'p4')">VS Code</button>
+<button class="tb" onclick="sw(this,'p5')">Windsurf</button>
+</div>
+<div id="p1" class="tp on">
+<p style="color:var(--mut);font-size:.875rem;margin-bottom:16px">No config files or terminal commands needed &mdash; set up entirely from the Claude Desktop UI.</p>
+<div class="idesteps">
+<div class="ids"><div class="isn">1</div><div><h4>Open Claude Desktop</h4><p>Launch the Claude Desktop app on your computer.</p></div></div>
+<div class="ids"><div class="isn">2</div><div><h4>Open Settings</h4><p>Click the menu icon and select Settings.</p></div></div>
+<div class="ids"><div class="isn">3</div><div><h4>Select "Connector"</h4><p>Switch to the Connector tab in the settings panel.</p></div></div>
+<div class="ids"><div class="isn">4</div><div><h4>Add Custom Connector</h4><p>Click the "Add Custom Connector" button.</p></div></div>
+<div class="ids"><div class="isn">5</div><div><h4>Enter Name &amp; URL</h4>
+<div class="fr"><div class="fl">NAME</div><div class="fv">Unusual Whales</div><button class="fc" onclick="cpTxt(this,'Unusual Whales')">Copy</button></div>
+<div class="fr" style="margin-top:8px"><div class="fl">URL</div><div class="fv">https://api.unusualwhales.com/api/mcp?token=YOUR_API_KEY</div><button class="fc" onclick="cpTxt(this,'https://api.unusualwhales.com/api/mcp?token=YOUR_API_KEY')">Copy</button></div>
+<span class="clbl">Replace YOUR_API_KEY with your actual key from Settings &rarr; API Dashboard</span>
+</div></div>
+</div>
+</div>
+<div id="p2" class="tp">
+<p style="color:var(--mut);font-size:.875rem;margin-bottom:16px">Connect through Perplexity's connector flow by pasting the JSON below.</p>
+<div class="idesteps">
+<div class="ids"><div class="isn">1</div><div><h4>Open Perplexity Settings</h4><p>Go to the Connectors or MCP settings area.</p></div></div>
+<div class="ids"><div class="isn">2</div><div><h4>Add a Custom Connector</h4><p>Choose the option to add a custom MCP connector or server.</p></div></div>
+<div class="ids"><div class="isn">3</div><div><h4>Paste the JSON</h4><p>Replace <code>&lt;TOKEN&gt;</code> with your API key, then paste:</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "args": [
+    "-y",
+    "mcp-remote",
+    "https://api.unusualwhales.com/api/mcp",
+    "--header",
+    "Authorization: Bearer YOUR_API_KEY"
+  ],
+  "command": "npx",
+  "env": {},
+  "useBuiltInNode": true
+}</code></pre></div></div>
+<div class="ids"><div class="isn">4</div><div><h4>Save and Connect</h4><p>Save the connector, then refresh or reopen Perplexity if the tools do not appear right away.</p></div></div>
+</div>
+</div>
+<div id="p3" class="tp">
+<p style="color:var(--mut);font-size:.875rem;margin-bottom:16px">Add to <code>~/.cursor/mcp.json</code> (create if it doesn't exist):</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "mcpServers": {
+    "unusual-whales": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.unusualwhales.com/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY"
+      ]
+    }
+  }
+}</code></pre>
+</div>
+<div id="p4" class="tp">
+<p style="color:var(--mut);font-size:.875rem;margin-bottom:16px">Add to your VS Code <code>settings.json</code> (Cmd+Shift+P &rarr; Open User Settings JSON):</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "mcpServers": {
+    "unusual-whales": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.unusualwhales.com/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY"
+      ]
+    }
+  }
+}</code></pre>
+</div>
+<div id="p5" class="tp">
+<p style="color:var(--mut);font-size:.875rem;margin-bottom:16px">Add to <code>~/.codeium/windsurf/mcp_config.json</code>:</p>
+<pre><button class="cl" onclick="cp(this)">Copy</button><code>{
+  "mcpServers": {
+    "unusual-whales": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.unusualwhales.com/api/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_API_KEY"
+      ]
+    }
+  }
+}</code></pre>
+</div>
+
+<h2>Available Tools (Remote MCP &mdash; 70 Tools)</h2>
+<span class="tc">70 tools</span>
+<div class="tg">
+<span class="tt">get_analyst_ratings</span><span class="tt">get_av_technical_indicator</span><span class="tt">get_balance_sheets</span><span class="tt">get_cash_flows</span><span class="tt">get_central_bank_rates</span><span class="tt">get_chains_for_expiry</span><span class="tt">get_company_info</span><span class="tt">get_congress_trades</span><span class="tt">get_correlations</span><span class="tt">get_dark_pool_trades</span><span class="tt">get_dark_pool_volume_price_group</span><span class="tt">get_earnings_history</span><span class="tt">get_earnings_report</span><span class="tt">get_flow_alert_rules</span><span class="tt">get_flow_alerts</span><span class="tt">get_flow_watchlist</span><span class="tt">get_fundamental_breakdown</span><span class="tt">get_futures_indices</span><span class="tt">get_historic_chains</span><span class="tt">get_income_statements</span><span class="tt">get_insider_trades</span><span class="tt">get_institution_holdings</span><span class="tt">get_institutions</span><span class="tt">get_interval_flow</span><span class="tt">get_market_events</span><span class="tt">get_market_state</span><span class="tt">get_midterms_ratings</span><span class="tt">get_open_interest_changes</span><span class="tt">get_option_trades</span><span class="tt">get_options_chain</span><span class="tt">get_options_screener</span><span class="tt">get_options_watchlist</span><span class="tt">get_politics_overview</span><span class="tt">get_prediction_insiders</span><span class="tt">get_prediction_market</span><span class="tt">get_prediction_smart_money</span><span class="tt">get_prediction_unusual_markets</span><span class="tt">get_prediction_user</span><span class="tt">get_prediction_watchlist</span><span class="tt">get_prediction_whales</span><span class="tt">get_seasonality_month</span><span class="tt">get_stock_screener</span><span class="tt">get_stock_watchlist</span><span class="tt">get_support_info</span><span class="tt">get_ticker_candles_by_range</span><span class="tt">get_ticker_close_prices</span><span class="tt">get_ticker_indicator_events</span><span class="tt">get_ticker_indicator_series</span><span class="tt">get_ticker_ohlc_latest_or_date</span><span class="tt">get_ticker_performances</span><span class="tt">get_upcoming_earnings</span><span class="tt">get_users_dark_pool_watchlists</span><span class="tt">get_users_flow_alerts_watchlists</span><span class="tt">get_users_flow_watchlists</span><span class="tt">get_users_interval_flow_watchlists</span><span class="tt">get_users_oi_changes_watchlists</span><span class="tt">get_users_options_screener_watchlists</span><span class="tt">get_users_options_watchlists</span><span class="tt">get_users_stock_watchlists</span><span class="tt">get_yield_curve</span><span class="tt">add_market_to_prediction_watchlist</span><span class="tt">add_user_to_prediction_watchlist</span><span class="tt">create_option_watchlist</span><span class="tt">create_stock_watchlist</span><span class="tt">remove_market_from_prediction_watchlist</span><span class="tt">remove_user_to_prediction_watchlist</span><span class="tt">search_option_contracts</span><span class="tt">search_tickers</span><span class="tt">update_option_watchlist</span><span class="tt">update_stock_watchlist</span>
+</div>
+
+<h2>Example Queries</h2>
+<div class="qg">
+<div class="qc"><p class="qt">"Show me unusual options flow on NVDA today"</p><p class="qu">Uses: <code>get_flow_alerts</code>, <code>get_option_trades</code></p></div>
+<div class="qc"><p class="qt">"What are Congress members buying this week?"</p><p class="qu">Uses: <code>get_congress_trades</code></p></div>
+<div class="qc"><p class="qt">"Analyze dark pool activity for SPY"</p><p class="qu">Uses: <code>get_dark_pool_trades</code>, <code>get_dark_pool_volume_price_group</code></p></div>
+<div class="qc"><p class="qt">"Give me a full market overview with sector sentiment"</p><p class="qu">Uses: <code>get_market_state</code>, <code>get_market_events</code>, <code>get_futures_indices</code></p></div>
+<div class="qc"><p class="qt">"Show insider buying in the technology sector"</p><p class="qu">Uses: <code>get_insider_trades</code></p></div>
+<div class="qc"><p class="qt">"Find stocks with high IV rank and bullish flow"</p><p class="qu">Uses: <code>get_stock_screener</code>, <code>get_flow_alerts</code></p></div>
+<div class="qc"><p class="qt">"Show unusual prediction market activity in politics"</p><p class="qu">Uses: <code>get_prediction_unusual_markets</code></p></div>
+<div class="qc"><p class="qt">"What are the upcoming earnings this week?"</p><p class="qu">Uses: <code>get_upcoming_earnings</code></p></div>
+</div>
+
+<h2>Local MCP Environment Variables</h2>
+<table>
+<thead><tr><th>Variable</th><th>Required</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>UW_API_KEY</code></td><td><span class="req">Yes</span></td><td>&mdash;</td><td>Your Unusual Whales API key</td></tr>
+<tr><td><code>UW_RATE_LIMIT_PER_MINUTE</code></td><td>No</td><td><code>120</code></td><td>API rate limit (requests per minute)</td></tr>
+<tr><td><code>UW_MAX_RETRIES</code></td><td>No</td><td><code>3</code></td><td>Maximum retry attempts for failed requests</td></tr>
+<tr><td><code>UW_CIRCUIT_BREAKER_THRESHOLD</code></td><td>No</td><td><code>5</code></td><td>Failure threshold before circuit breaker opens</td></tr>
+<tr><td><code>UW_CIRCUIT_BREAKER_RESET_TIMEOUT</code></td><td>No</td><td><code>30000</code></td><td>Circuit breaker reset timeout in milliseconds</td></tr>
+</tbody>
+</table>
+
+<h2>Troubleshooting</h2>
+<div class="faq">
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>Server not connecting / Failed to connect</span><span>+</span></button><div class="fqa">Make sure you are using the correct URL: <code>https://api.unusualwhales.com/api/mcp</code>. Common mistakes: using <code>unusualwhales.com/public-api/mcp</code> (that is the documentation page) or <code>mcp.unusualwhales.com</code> (a different, limited server). After updating your config, restart your AI assistant.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>401 Unauthorized errors</span><span>+</span></button><div class="fqa">Verify your API key is correct and active. For remote config, ensure the Authorization header uses <code>Bearer YOUR_API_KEY</code>. For local config, check that <code>UW_API_KEY</code> is set in the env block.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>npx command not found</span><span>+</span></button><div class="fqa">Ensure Node.js 18+ is installed. Run <code>node --version</code> to check. If you use nvm, Claude Desktop may not find npx because it doesn't inherit your shell PATH. Fix this by using the full path to npx (e.g. <code>/Users/you/.nvm/versions/node/v20.x.x/bin/npx</code>) and add an env block with PATH.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>Config not working / MCP server not detected</span><span>+</span></button><div class="fqa">Make sure the <code>"mcpServers"</code> block is a top-level key in your JSON file, at the same level as <code>"preferences"</code> or other existing keys &mdash; not nested inside them.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>Tools not appearing in AI assistant</span><span>+</span></button><div class="fqa">Fully quit and reopen your AI assistant after adding the MCP config &mdash; just saving the file is not enough. Check that the JSON is valid with no trailing commas.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>Rate limiting (429 errors)</span><span>+</span></button><div class="fqa">The default rate limit is 120 requests/minute. Reduce concurrent queries or upgrade your plan for higher limits. The MCP server has built-in retry logic with exponential backoff.</div></div>
+<div class="fq"><button class="fqh" onclick="fq(this)"><span>Connection timeout</span><span>+</span></button><div class="fqa">Check your network connection. For remote config, verify you can reach <code>api.unusualwhales.com</code>. For local config, ensure npx can download the <code>@unusualwhales/mcp</code> package.</div></div>
+</div>
+
+<div class="cta">
+<h2>Ready to connect AI to market data?</h2>
+<p>Get your API key and start querying options flow, dark pool data, congressional trades, and more with natural language.</p>
+<div class="brow" style="justify-content:center">
+<a class="btn bp" href="https://unusualwhales.com/settings/api-dashboard">Get Started</a>
+<a class="btn bg" href="https://www.npmjs.com/package/@unusualwhales/mcp">npm Package &rarr;</a>
+<a class="btn bg" href="https://unusualwhales.com/public-api">Back to Public API</a>
+</div>
+</div>
+</div>
+<script>
+function sw(btn,id){
+document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+document.querySelectorAll('.tp').forEach(p=>p.classList.remove('on'));
+btn.classList.add('on');
+document.getElementById(id).classList.add('on');
+}
+function cp(btn){
+var pre=btn.closest('pre');
+var code=pre.querySelector('code');
+navigator.clipboard.writeText(code.innerText).then(function(){
+btn.textContent='Copied!';
+btn.classList.add('ok');
+setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},2000);
+});
+}
+function cpTxt(btn,txt){
+navigator.clipboard.writeText(txt).then(function(){
+btn.textContent='Copied!';
+btn.classList.add('ok');
+setTimeout(function(){btn.textContent='Copy';btn.classList.remove('ok');},2000);
+});
+}
+function fq(btn){
+var ans=btn.nextElementSibling;
+var sp=btn.querySelector('span:last-child');
+if(ans.classList.contains('open')){ans.classList.remove('open');sp.textContent='+';}
+else{ans.classList.add('open');sp.textContent='-';}
+}
+</script>
+</body>
+</html>
